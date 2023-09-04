@@ -1,0 +1,218 @@
+﻿@page "/contacts"
+@using BlazorApp.Entities;
+@inject BlazorApp.Repositories.UserRepository.IUserRepository UserRepository
+
+
+@if(Users == null)
+{
+    <p>Loading... </p>
+} else
+{
+
+   
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal" @onclick="() => ShowAddUserModal()">
+        Add User
+    </button>
+
+    <div class="" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: @(isAddUserModalVisible ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Contact</h5>
+                    <button type="button" class="close" @onclick="() => CloseAddUserModal()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" class="form-control" id="firstName" @bind="newUser.FirstName" />
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" class="form-control" id="lastName" @bind="newUser.LastName" />
+                    </div>
+                    <div class="form-group">
+                        <label for="contactNumber">Contact Number:</label>
+                        <input type="text" class="form-control" id="contactNumber" @bind="newUser.ContactNumber" />
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <input type="text" class="form-control" id="address" @bind="newUser.Address" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" @onclick="() => AddUser()">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="" id="editUserModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" style="display: @(isEditUserModalVisible ? "block" : "none")">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit User</h5>
+                    <button type="button" class="close" @onclick="CloseEditUserModal">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="editFirstName">First Name:</label>
+                        <input type="text" class="form-control" id="editFirstName" @bind="editedUser.FirstName" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editFirstName">Last Name:</label>
+                        <input type="text" class="form-control" id="editFirstName" @bind="editedUser.FirstName" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactNumber">Contact Number:</label>
+                        <input type="text" class="form-control" id="editFirstName" @bind="editedUser.ContactNumber" />
+                    </div>
+
+
+                    <div class="form-group">
+                        <label for="address">Address:</label>
+                        <input type="text" class="form-control" id="editFirstName" @bind="editedUser.Address" />
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="CloseEditUserModal">Close</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveEditedUser">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+   
+     
+
+
+    
+
+
+
+  
+
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                
+                <th>User ID </th>
+                <th>Name  </th>
+                <th>Contact Number</th>
+                <th>Address  </th>
+                <th>Actions </th>
+            </tr>
+        </thead>
+        <tbody>
+
+
+
+            @foreach (var user in Users)
+            {
+                <tr>
+                    <td>@user.ID</td>
+                    <td>@user.FirstName @user.LastName</td>
+                    <td>@user.ContactNumber</td>
+                    <td>@user.Address</td>
+                    <td class="flex-o">
+                        <button class="btn btn-success" @onclick="() => EditUser(user)"> Edit </button>
+                        <button class="btn btn-danger" @onclick="() => DeleteUser(user)"> Delete </button>
+                    </td>
+                </tr>
+            }
+
+
+        </tbody>
+    </table>
+
+   
+
+}
+
+
+@code {
+    private IEnumerable<User> Users;
+    private User newUser = new User();
+    private bool isAddUserModalVisible = false;
+    private bool isUpdateUserModalVisible = false;
+
+
+
+    private User editedUser = new User();
+    private bool isEditUserModalVisible = false;
+
+    private void EditUser(User user)
+    {
+        editedUser = user;
+        isEditUserModalVisible = true;
+    }
+
+    private async Task SaveEditedUser()
+    {
+        if (!string.IsNullOrWhiteSpace(editedUser.FirstName) && !string.IsNullOrWhiteSpace(editedUser.LastName))
+        {
+            await UserRepository.Update(editedUser);
+            Users = await UserRepository.GetAll();
+            CloseEditUserModal();
+            editedUser = new User();
+        }
+    }
+
+    private void CloseEditUserModal()
+    {
+        isEditUserModalVisible = false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Users = await UserRepository.GetAll();
+    }
+
+    private async Task DeleteUser(User user)
+    {
+        await UserRepository.Delete(user);
+        Users = await UserRepository.GetAll();
+    }
+    private void CloseAddUserModal()
+    {
+        isAddUserModalVisible = false;
+        isUpdateUserModalVisible = false;
+    }
+
+
+
+    private void ShowAddUserModal()
+    {
+        isAddUserModalVisible = true;
+    }
+
+    private void ShowUpdate()
+    {
+        isAddUserModalVisible = true;
+    }
+
+    private async Task AddUser()
+    {
+        if (!string.IsNullOrWhiteSpace(newUser.FirstName) && !string.IsNullOrWhiteSpace(newUser.LastName))
+        {
+            await UserRepository.Create(newUser);
+            Users = await UserRepository.GetAll();
+            CloseAddUserModal();
+            newUser = new User();
+        }
+    }
+
+    
+
+}
