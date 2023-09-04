@@ -1,8 +1,10 @@
-using BlazorApp.Data;
-using BlazorApp.Pages;
-using BlazorApp.Repositories.UserRepository;
-using Microsoft.AspNetCore.Components;
+using DotNetEnv;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components;
+using BlazorApp.Repositories.UserRepository;
+using BlazorApp.Services;
+using BlazorApp.Pages;
+using BlazorApp.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,10 +17,12 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+builder.Services.AddScoped<RabbitMQService>();
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddSingleton<ContactOverview>();
-builder.Services.AddScoped<IUserRepository,  UserRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+DotNetEnv.Env.Load();
 
 var app = builder.Build();
 

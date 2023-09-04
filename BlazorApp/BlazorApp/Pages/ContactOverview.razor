@@ -1,6 +1,8 @@
 ﻿@page "/contacts"
 @using BlazorApp.Entities;
+@using BlazorApp.Services;
 @inject BlazorApp.Repositories.UserRepository.IUserRepository UserRepository
+@inject EmailService e
 
 
 @if(Users == null)
@@ -144,6 +146,10 @@
 @code {
     private IEnumerable<User> Users;
     private User newUser = new User();
+    
+
+
+
     private bool isAddUserModalVisible = false;
     private bool isUpdateUserModalVisible = false;
 
@@ -181,7 +187,10 @@
 
     private async Task DeleteUser(User user)
     {
+
+        
         await UserRepository.Delete(user);
+        e.SendEmail("ctanedo@fullscale.io", "Delete  Contact", "New Contact is been deleted in the CMS");
         Users = await UserRepository.GetAll();
     }
     private void CloseAddUserModal()
